@@ -15,4 +15,17 @@ body {
     align-items: center;
     justify-content: center;
     background: slateblue;
+    font-family: Arial;
+}
+
+.play-area {
+    display: flex;
+    align-items: flex-start;
+    gap: 64px;
+}
+
+.next-area {
+    display: flex;
+    flex-direction: column;
+    font-size: 36px;
 }

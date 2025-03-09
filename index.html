@@ -7,7 +7,13 @@
     <title>Vite + TS</title>
   </head>
   <body>
-    <canvas id="canvas"></canvas>
+    <div class="play-area">
+      <canvas id="canvas"></canvas>
+      <div class="next-area">
+        <canvas id="next"></canvas>
+        <p>Lines: <span id="lines">0</span></p>
+      </div>
+    </div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

@@ -1,4 +1,4 @@
-import {clearAll, clearBlock, drawBlock} from "./ui.ts";
+import {clearAll, clearBlock, clearNext, drawBlock, getColor, paintNext, updateLinesText} from "./ui.ts";
 
 type FixedSizeArray<T, N extends number> = { length: N } & Array<T>;
 type TetrominoMap<N extends number = number> = FixedSizeArray<FixedSizeArray<boolean, N>, N>
@@ -125,6 +125,33 @@ export class Tetromino {
     readonly #map: TetrominoMap;
     readonly #identifier: string;
 
+    public get size(): number {
+        return  this.#map.length
+    }
+
+    public get height(): number {
+        let height = 0;
+        for (let i = 0; i < this.#map.length; i++) {
+            if (this.#map[i].some(Boolean)) {
+                ++height
+            }
+        }
+        return height;
+    }
+
+    public get width(): number {
+        let width = 0
+        for (let i = 0; i < this.#map.length; i++) {
+            for (let j = 0; j < this.#map.length; j++) {
+                if (this.#map[j][i]) {
+                    ++width
+                    break
+                }
+            }
+        }
+        return width
+    }
+
     public get identifier(): string {
         return this.#identifier;
     }
@@ -143,6 +170,55 @@ export class Tetromino {
                 }
             }
         }
+    }
+
+    *getShapePositions(): Iterable<FixedSizeArray<number, 2>> {
+        let rowRemove = 0
+        let columnRemove = 0;
+        for (let i = 0; i < this.#map.length; i++) {
+            if (this.#map[i].every(e => !e)) {
+                rowRemove = i
+                break
+            }
+            for (let j = 0; j < this.#map.length; j++) {
+                if (this.#map[j][i]) {
+                    --columnRemove
+                    break
+                }
+            }
+        }
+
+        for (let [x,y] of this.blockPositions()) {
+            yield [x-columnRemove, y - rowRemove]
+        }
+    }
+
+    getDimensions(): FixedSizeArray<number, 4> {
+        const list = Array.from(this.blockPositions())
+
+        let minX: number | undefined;
+        let maxX: number | undefined;
+        let minY: number | undefined;
+        let maxY: number | undefined;
+
+
+        for (let [x, y] of list) {
+            if (minX === undefined || x < minX) {
+                minX = x
+            }
+            if (maxX === undefined || x > maxX) {
+                maxX = x
+            }
+            if (minY === undefined || y < minY) {
+                minY = y
+            }
+            if (maxY === undefined || y > maxY) {
+                maxY = y
+            }
+        }
+
+        return [minX!, maxX!, minY!, maxY!];
+
     }
 
     #transpose(): void {
@@ -221,38 +297,19 @@ export const squareTetromino: TetrominoMap<2> = [
     [true, true]
 ];
 
-
-
 export class Game {
     #map: TetrisMap
     #intervalTime: number
     #activeTetromino: Tetromino
     #activePosition: {x: number; y: number}
+    #nextTetromino: Tetromino
 
     constructor() {
         this.#map = new TetrisMap(20, 10)
         this.#intervalTime = 1000 / 2
         this.#activePosition = {x: 5, y: -4}
         this.#activeTetromino = getNextTetromino()
-    }
-
-    #getColor(identifier: string): string {
-        switch (identifier) {
-            case "Q":
-                return "red"
-            case "I":
-                return "lightskyblue"
-            case "T":
-                return "lime"
-            case "F":
-                return "blue"
-            case "S":
-                return "yellow"
-            case "L":
-                return "rebeccapurple"
-            default:
-                return "orange"
-        }
+        this.#nextTetromino = getNextTetromino()
     }
 
     #hideActiveTetromino(): void {
@@ -263,19 +320,23 @@ export class Game {
 
     #drawActiveTetromino(): void {
         for (let position of this.#activeTetromino.blockPositions()) {
-            drawBlock(this.#activePosition.x + position[0], this.#activePosition.y + position[1], this.#getColor(this.#activeTetromino.identifier))
+            drawBlock(this.#activePosition.x + position[0], this.#activePosition.y + position[1], getColor(this.#activeTetromino.identifier))
         }
     }
 
     #placeTetromino(): void {
         this.#map.place(this.#activeTetromino, this.#activePosition.x, this.#activePosition.y)
         for (let position of this.#activeTetromino.blockPositions()) {
-            drawBlock(this.#activePosition.x + position[0], this.#activePosition.y + position[1], this.#getColor(this.#activeTetromino.identifier))
+            drawBlock(this.#activePosition.x + position[0], this.#activePosition.y + position[1], getColor(this.#activeTetromino.identifier))
         }
         this.#activePosition = {x: 5, y: -5}
-        this.#activeTetromino = getNextTetromino()
-        this.#map.clearFullRows()
+        this.#activeTetromino = this.#nextTetromino
+        this.#nextTetromino = getNextTetromino()
+        const linesToAdd = this.#map.clearFullRows()
+        updateLinesText(linesToAdd)
         this.#paintFromMap()
+        clearNext()
+        this.#paintNext()
         if (this.#map.isOverflown) {
             // TODO implement game over screen
             console.log("Game over")
@@ -283,10 +344,21 @@ export class Game {
 
     }
 
+    #paintNext(): void {
+
+        const [minX, maxX, minY, maxY] = this.#nextTetromino.getDimensions()
+        const width = maxX - minX + 1
+        const height = maxY - minY + 1
+
+        for (let block of this.#nextTetromino.blockPositions()) {
+            paintNext(width, height, block[0] - minX, block[1] - minY, getColor(this.#nextTetromino.identifier))
+        }
+    }
+
     #paintFromMap(): void {
         clearAll()
         for (let block of this.#map.getFilledFields()) {
-            drawBlock(block.x, block.y, this.#getColor(block.identifier))
+            drawBlock(block.x, block.y, getColor(block.identifier))
         }
     }
 
@@ -309,8 +381,8 @@ export class Game {
     }
 
     start(): void {
-        this.#activeTetromino.print();
         this.#loop(this.#intervalTime);
+        this.#paintNext()
     }
 
     moveRight() {
