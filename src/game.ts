@@ -180,17 +180,23 @@ export class Tetromino {
 }
 
 export const ITetromino: TetrominoMap<4> = [
-    [true, false, false, false],
-    [true, false, false, false],
-    [true, false, false, false],
-    [true, false, false, false],
+    [false, true, false, false],
+    [false, true, false, false],
+    [false, true, false, false],
+    [false, true, false, false],
 ];
 
 export const STetromino: TetrominoMap<3> = [
-    [true, false, false],
+    [false, true, true],
     [true, true, false],
-    [false, true, false],
+    [false, false, false],
 ];
+
+export const FSTetromino: TetrominoMap<3> = [
+    [true, true, false],
+    [false, true, true],
+    [false, false, false]
+]
 
 export const TTetromino: TetrominoMap<3> = [
     [false, false, false],
@@ -243,7 +249,7 @@ export class Game {
             case "S":
                 return "yellow"
             case "L":
-                return "purple"
+                return "rebeccapurple"
             default:
                 return "orange"
         }
@@ -343,7 +349,7 @@ function getNextTetromino(): Tetromino {
     const number = Math.floor(Math.random() * 6);
     switch (number) {
         case 0:
-            return new Tetromino("q", structuredClone(squareTetromino))
+            return new Tetromino("Q", structuredClone(squareTetromino))
         case 1:
             return new Tetromino("I", structuredClone(ITetromino))
         case 2:
@@ -352,6 +358,8 @@ function getNextTetromino(): Tetromino {
             return new Tetromino("F", structuredClone(FLTetromino))
         case 4:
             return new Tetromino("S", structuredClone(STetromino))
+        case 5:
+            return new Tetromino("FS", structuredClone(FSTetromino))
         default:
             return new Tetromino("L", structuredClone(LTetromino))
     }
