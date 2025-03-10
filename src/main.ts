@@ -24,7 +24,6 @@ $playAgain.addEventListener("click", () => {
 })
 
 window.addEventListener("keydown", (event) => {
-    console.log(event.key);
     if (event.key === "ArrowLeft" || event.key === "a" || event.key === "h") {
         game?.moveLeft()
     } else if (event.key === "ArrowRight" || event.key === "d" || event.key === "l") {

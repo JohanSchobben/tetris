@@ -65,9 +65,24 @@ export function clearAll() {
 }
 
 export function updateCounts(linesCleared: number, score: number, level: number) {
-    $score.textContent = String(score)
+    // $score.textContent = String(score)
     $lines.textContent = String(linesCleared)
     $level.textContent = String(level)
+    updateScore(score)
+}
+
+function updateScore(score: number): void {
+    const oldScore = Number($score.textContent)!
+    const incrementer = score - oldScore < 600 ? 1 : 3;
+    let shownScore = oldScore
+    const timer = setInterval(() => {
+        shownScore = Math.min(shownScore + incrementer, score)
+        $score.textContent = String(shownScore)
+        if (shownScore >= score) {
+            clearInterval(timer)
+        }
+    }, 32)
+
 }
 
 export function paintNext(width: number, height: number, x: number, y: number, color: string) {

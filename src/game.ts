@@ -373,7 +373,7 @@ export class Game {
 }
 
 function getNextTetromino(): Tetromino {
-    const number = Math.floor(Math.random() * 6);
+    const number = Math.floor(Math.random() * 7);
     switch (number) {
         case 0:
             return new Tetromino("Q", structuredClone(squareTetromino))
