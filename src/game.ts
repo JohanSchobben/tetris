@@ -1,4 +1,13 @@
-import {clearAll, clearBlock, clearNext, drawBlock, getColor, paintNext, updateLinesText} from "./ui.ts";
+import {
+    clearAll,
+    clearBlock,
+    clearNext,
+    drawBlock,
+    getColor,
+    paintNext,
+    showGameOverDialog,
+    updateCounts
+} from "./ui.ts";
 
 type FixedSizeArray<T, N extends number> = { length: N } & Array<T>;
 type TetrominoMap<N extends number = number> = FixedSizeArray<FixedSizeArray<boolean, N>, N>
@@ -34,14 +43,6 @@ export class TetrisMap {
 
     #isRowEmpty(i: number): boolean {
         return this.#board[i].every(item => !Boolean(item));
-    }
-
-    public get height(): number {
-        return this.#height;
-    }
-
-    public get width(): number {
-        return this.#width;
     }
 
     public get isOverflown(): boolean {
@@ -99,16 +100,6 @@ export class TetrisMap {
         }
     }
 
-    print() {
-        let s = "";
-        for (let i = 0; i < this.#board.length; i ++) {
-            s += "\n"
-            s += this.#board[i].map(i => i ?? " ").join(" | ")
-            s += "\n"
-            s += "---------------------------"
-        }
-        console.log(s)
-    }
 
     #isRowFull(r: number) {
         for (let i = 0; i < this.#width; i++) {
@@ -124,33 +115,6 @@ export class TetrisMap {
 export class Tetromino {
     readonly #map: TetrominoMap;
     readonly #identifier: string;
-
-    public get size(): number {
-        return  this.#map.length
-    }
-
-    public get height(): number {
-        let height = 0;
-        for (let i = 0; i < this.#map.length; i++) {
-            if (this.#map[i].some(Boolean)) {
-                ++height
-            }
-        }
-        return height;
-    }
-
-    public get width(): number {
-        let width = 0
-        for (let i = 0; i < this.#map.length; i++) {
-            for (let j = 0; j < this.#map.length; j++) {
-                if (this.#map[j][i]) {
-                    ++width
-                    break
-                }
-            }
-        }
-        return width
-    }
 
     public get identifier(): string {
         return this.#identifier;
@@ -169,27 +133,6 @@ export class Tetromino {
                     yield [j, i];
                 }
             }
-        }
-    }
-
-    *getShapePositions(): Iterable<FixedSizeArray<number, 2>> {
-        let rowRemove = 0
-        let columnRemove = 0;
-        for (let i = 0; i < this.#map.length; i++) {
-            if (this.#map[i].every(e => !e)) {
-                rowRemove = i
-                break
-            }
-            for (let j = 0; j < this.#map.length; j++) {
-                if (this.#map[j][i]) {
-                    --columnRemove
-                    break
-                }
-            }
-        }
-
-        for (let [x,y] of this.blockPositions()) {
-            yield [x-columnRemove, y - rowRemove]
         }
     }
 
@@ -249,10 +192,6 @@ export class Tetromino {
             }
         }
     }
-
-    print() {
-        console.log(this.#map)
-    }
 }
 
 export const ITetromino: TetrominoMap<4> = [
@@ -303,13 +242,27 @@ export class Game {
     #activeTetromino: Tetromino
     #activePosition: {x: number; y: number}
     #nextTetromino: Tetromino
+    #linesCleared: number
+    #score: number
+    #level: number
 
     constructor() {
         this.#map = new TetrisMap(20, 10)
-        this.#intervalTime = 1000 / 2
+        this.#intervalTime = 1000
         this.#activePosition = {x: 5, y: -4}
         this.#activeTetromino = getNextTetromino()
         this.#nextTetromino = getNextTetromino()
+        this.#score = 0
+        this.#linesCleared = 0
+        this.#level = 0
+    }
+
+    #updateNumbers(linesCleared: number) {
+        const base = [40, 100, 300, 1200][linesCleared - 1] ?? 1200
+        this.#score += base * (this.#level + 1)
+        this.#linesCleared += linesCleared
+        this.#level = Math.floor(this.#linesCleared / 10)
+        this.#intervalTime = 1000 - this.#level * 50
     }
 
     #hideActiveTetromino(): void {
@@ -332,20 +285,22 @@ export class Game {
         this.#activePosition = {x: 5, y: -5}
         this.#activeTetromino = this.#nextTetromino
         this.#nextTetromino = getNextTetromino()
-        const linesToAdd = this.#map.clearFullRows()
-        updateLinesText(linesToAdd)
+        const linesCleared = this.#map.clearFullRows()
+        if (linesCleared > 0) {
+            this.#updateNumbers(linesCleared)
+            updateCounts(this.#linesCleared, this.#score, this.#level)
+        }
+
         this.#paintFromMap()
         clearNext()
         this.#paintNext()
         if (this.#map.isOverflown) {
-            // TODO implement game over screen
-            console.log("Game over")
+            showGameOverDialog(this.#linesCleared, this.#level, this.#score)
         }
 
     }
 
     #paintNext(): void {
-
         const [minX, maxX, minY, maxY] = this.#nextTetromino.getDimensions()
         const width = maxX - minX + 1
         const height = maxY - minY + 1

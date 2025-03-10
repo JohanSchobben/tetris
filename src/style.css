@@ -14,8 +14,9 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: slateblue;
-    font-family: Arial;
+    background: rebeccapurple;
+    color: gold;
+    font-family: Arial, sans-serif;
 }
 
 .play-area {
@@ -28,4 +29,53 @@ body {
     display: flex;
     flex-direction: column;
     font-size: 36px;
+}
+
+dialog {
+    inset: 0;
+    margin: 0;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: none;
+    padding: 1rem;
+    background: rebeccapurple;
+    color: gold;
+}
+
+.dialog-title {
+    font-size: 2rem;
+}
+
+.game-over-text {
+    margin-top: 16px;
+    margin-bottom: 8px;
+}
+
+.game-over-numbers {
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.game-over-numbers td {
+    padding: 4px;
+}
+
+.dialog-actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+}
+
+.btn {
+    color: rebeccapurple;
+    background: gold;
+    padding: 8px 16px;
+    border-radius: 4px;
+}
+
+::backdrop {
+    background: rgba(0,0,0, 0.6);
 }

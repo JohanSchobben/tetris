@@ -1,8 +1,15 @@
-const canvas: HTMLCanvasElement = document.querySelector("#canvas")!
-const ctx: CanvasRenderingContext2D = canvas.getContext("2d")!
-const lines: HTMLSpanElement = document.querySelector("#lines")!
-const next: HTMLCanvasElement = document.querySelector("#next")!
-const nextCtx: CanvasRenderingContext2D = next.getContext("2d")!
+const $canvas: HTMLCanvasElement = document.querySelector("#canvas")!
+const ctx: CanvasRenderingContext2D = $canvas.getContext("2d")!
+const $next: HTMLCanvasElement = document.querySelector("#next")!
+const nextCtx: CanvasRenderingContext2D = $next.getContext("2d")!
+const $lines: HTMLSpanElement = document.querySelector("#lines")!
+const $score: HTMLSpanElement = document.querySelector("#score")!
+const $level: HTMLSpanElement = document.querySelector("#level")!
+const $levelTable: HTMLTableCellElement = document.querySelector("#level-table")!
+const $scoreTable: HTMLTableCellElement = document.querySelector("#score-table")!
+const $linesTable: HTMLTableCellElement = document.querySelector("#lines-table")!
+const $dialog: HTMLDialogElement = document.querySelector("#dialog")!
+const $playAgain: HTMLButtonElement = document.querySelector("#play-again")!
 const TILE_SIZE = 40;
 const BORDER_SIZE = 2;
 const backgroundColor = "#b3c3dc";
@@ -26,17 +33,17 @@ function clear(ctx: CanvasRenderingContext2D) {
 }
 
 export function setup(width: number, height: number): void {
-    canvas.width = width * TILE_SIZE
-    canvas.height = height * TILE_SIZE
+    $canvas.width = width * TILE_SIZE
+    $canvas.height = height * TILE_SIZE
 
-    next.height = 5 * TILE_SIZE;
-    next.width = 5 * TILE_SIZE;
+    $next.height = 5 * TILE_SIZE;
+    $next.width = 5 * TILE_SIZE;
 
     ctx.fillStyle = backgroundColor
-    ctx.fillRect(0, 0, canvas.width, canvas.height)
+    ctx.fillRect(0, 0, $canvas.width, $canvas.height)
 
     nextCtx.fillStyle = backgroundColor
-    nextCtx.fillRect(0, 0, next.width, next.height)
+    nextCtx.fillRect(0, 0, $next.width, $next.height)
 }
 
 export function drawBlock(x: number, y: number, color: string) {
@@ -58,14 +65,15 @@ export function clearAll() {
     clear(ctx)
 }
 
-export function updateLinesText(amountToAdd: number) {
-    const score = Number(lines.textContent);
-    lines.textContent = String(score + amountToAdd);
+export function updateCounts(linesCleared: number, score: number, level: number) {
+    $score.textContent = String(score)
+    $lines.textContent = String(linesCleared)
+    $level.textContent = String(level)
 }
 
 export function paintNext(width: number, height: number, x: number, y: number, color: string) {
-    const yOffset = (next.height - height * TILE_SIZE) / 2
-    const xOffset = (next.width - width * TILE_SIZE) / 2
+    const yOffset = ($next.height - height * TILE_SIZE) / 2
+    const xOffset = ($next.width - width * TILE_SIZE) / 2
     const xPos = x * TILE_SIZE + xOffset
     const yPos = y * TILE_SIZE + yOffset
     draw(nextCtx, xPos, yPos, color)
@@ -92,4 +100,13 @@ export function getColor(identifier: string): string {
         default:
             return "orange"
     }
+}
+
+
+export function showGameOverDialog(lines: number, level: number, score: number): void {
+    $linesTable.textContent = String(lines)
+    $levelTable.textContent = String(level)
+    $scoreTable.textContent = String(score)
+
+    $dialog.showModal()
 }

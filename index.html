@@ -12,8 +12,33 @@
       <div class="next-area">
         <canvas id="next"></canvas>
         <p>Lines: <span id="lines">0</span></p>
+        <p>Score: <span id="score">0</span></p>
+        <p>Level: <span id="level">0</span></p>
       </div>
     </div>
+    <dialog id="dialog">
+      <h2 class="dialog-title">Game Over</h2>
+      <p class="game-over-text">You lost. you scored</p>
+      <table class="game-over-numbers">
+        <tbody>
+        <tr>
+          <td>Score:</td>
+          <td id="score-table"></td>
+        </tr>
+        <tr>
+          <td>Level:</td>
+          <td id="level-table"></td>
+        </tr>
+        <tr>
+          <td>Lines:</td>
+          <td id="lines-table"></td>
+        </tr>
+        </tbody>
+      </table>
+      <div class="dialog-actions">
+        <button class="btn" id="play-again">Play again</button>
+      </div>
+    </dialog>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
