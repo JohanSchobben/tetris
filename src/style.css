@@ -20,7 +20,7 @@ body {
 }
 
 .play-area {
-    display: flex;
+    display: none;
     align-items: flex-start;
     gap: 64px;
 }
@@ -78,4 +78,19 @@ dialog {
 
 ::backdrop {
     background: rgba(0,0,0, 0.6);
+}
+
+#menu {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#menu .btn {
+    font-size: 1.6rem;
+    padding: 16px 32px;
+}
+
+.game-title {
+    font-size: 120px;
 }

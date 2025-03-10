@@ -9,7 +9,6 @@ const $levelTable: HTMLTableCellElement = document.querySelector("#level-table")
 const $scoreTable: HTMLTableCellElement = document.querySelector("#score-table")!
 const $linesTable: HTMLTableCellElement = document.querySelector("#lines-table")!
 const $dialog: HTMLDialogElement = document.querySelector("#dialog")!
-const $playAgain: HTMLButtonElement = document.querySelector("#play-again")!
 const TILE_SIZE = 40;
 const BORDER_SIZE = 2;
 const backgroundColor = "#b3c3dc";
