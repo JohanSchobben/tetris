@@ -6,6 +6,18 @@
     box-sizing: border-box;
 }
 
+:root {
+    --tetris-background-color: #b3c3dc;
+    --tetris-square-color: red;
+    --tetris-t-color: lime;
+    --tetris-l-color: rebeccapurple;
+    --tetris-s-color: yellow;
+    --tetris-flipped-l-color: blue;
+    --tetris-flipped-s-color: orange;
+    --tetris-line-color: lightskyblue;
+
+}
+
 html, body {
     height: 100%;
 }

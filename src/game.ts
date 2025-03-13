@@ -1,15 +1,4 @@
-import {
-    clearAll,
-    clearBlock,
-    clearNext,
-    drawBlock,
-    getColor,
-    paintNext,
-    showGameOverDialog,
-    updateCounts
-} from "./ui.ts";
-
-type FixedSizeArray<T, N extends number> = { length: N } & Array<T>;
+export type FixedSizeArray<T, N extends number> = { length: N } & Array<T>;
 type TetrominoMap<N extends number = number> = FixedSizeArray<FixedSizeArray<boolean, N>, N>
 
 export class TetrisMap {
@@ -188,7 +177,7 @@ export class Tetromino {
         this.#transpose();
         for (let i = 0; i < size / 2; i++) {
             for (let j = 0; j < size; j++) {
-                [this.#map[i][j], this.#map[i - size - 1][j]] = [this.#map[i - size - 1][j], this.#map[i][j]]
+                [this.#map[i][j], this.#map[size - i - 1][j]] = [this.#map[size - i - 1][j], this.#map[i][j]]
             }
         }
     }
@@ -236,158 +225,136 @@ export const squareTetromino: TetrominoMap<2> = [
     [true, true]
 ];
 
+export type Block = {
+    x: number;
+    y: number;
+    identifier: number;
+}
+
+
 export class Game {
-    #map: TetrisMap
-    #intervalTime: number
+    readonly #map: TetrisMap
     #activeTetromino: Tetromino
-    #activePosition: {x: number; y: number}
+    #activePosition: {x: number, y: number}
     #nextTetromino: Tetromino
     #linesCleared: number
     #score: number
-    #level: number
 
-    constructor() {
-        this.#map = new TetrisMap(20, 10)
-        this.#intervalTime = 1000
-        this.#activePosition = {x: 5, y: -4}
-        this.#activeTetromino = getNextTetromino()
-        this.#nextTetromino = getNextTetromino()
-        this.#score = 0
+    get level(): number {
+        return Math.floor(this.#linesCleared / 10)
+    }
+
+    get map(): TetrisMap {
+        return this.#map
+    }
+
+    get activeTetromino(): Tetromino {
+        return this.#activeTetromino
+    }
+
+    get nextTetromino(): Tetromino {
+        return this.#nextTetromino
+    }
+
+    get linesCleared(): number {
+        return this.#linesCleared
+    }
+
+    get score(): number {
+        return this.#score
+    }
+
+    get isOverflown(): boolean {
+        return this.#map.isOverflown
+    }
+
+
+    constructor(height: number, width: number) {
+        this.#map = new TetrisMap(height, width)
+        this.#activeTetromino = this.#getNextTetromino()
+        this.#activePosition = {x: Math.floor(width / 2), y: -5 }
+        this.#nextTetromino = this.#getNextTetromino()
         this.#linesCleared = 0
-        this.#level = 0
+        this.#score = 0
+    }
+
+    #getNextTetromino(): Tetromino {
+        const number = Math.floor(Math.random() * 7);
+        switch (number) {
+            case 0:
+                return new Tetromino("Q", structuredClone(squareTetromino))
+            case 1:
+                return new Tetromino("I", structuredClone(ITetromino))
+            case 2:
+                return new Tetromino("T", structuredClone(TTetromino))
+            case 3:
+                return new Tetromino("F", structuredClone(FLTetromino))
+            case 4:
+                return new Tetromino("S", structuredClone(STetromino))
+            case 5:
+                return new Tetromino("FS", structuredClone(FSTetromino))
+            default:
+                return new Tetromino("L", structuredClone(LTetromino))
+        }
     }
 
     #updateNumbers(linesCleared: number) {
         const base = [40, 100, 300, 1200][linesCleared - 1] ?? 1200
-        this.#score += base * (this.#level + 1)
+        this.#score += base * (this.level + 1)
         this.#linesCleared += linesCleared
-        this.#level = Math.floor(this.#linesCleared / 10)
-        this.#intervalTime = 1000 - this.#level * 50
-    }
-
-    #hideActiveTetromino(): void {
-        for (let position of this.#activeTetromino.blockPositions()) {
-            clearBlock(this.#activePosition.x + position[0], this.#activePosition.y + position[1])
-        }
-    }
-
-    #drawActiveTetromino(): void {
-        for (let position of this.#activeTetromino.blockPositions()) {
-            drawBlock(this.#activePosition.x + position[0], this.#activePosition.y + position[1], getColor(this.#activeTetromino.identifier))
-        }
     }
 
     #placeTetromino(): void {
         this.#map.place(this.#activeTetromino, this.#activePosition.x, this.#activePosition.y)
-        for (let position of this.#activeTetromino.blockPositions()) {
-            drawBlock(this.#activePosition.x + position[0], this.#activePosition.y + position[1], getColor(this.#activeTetromino.identifier))
-        }
         this.#activePosition = {x: 5, y: -5}
         this.#activeTetromino = this.#nextTetromino
-        this.#nextTetromino = getNextTetromino()
+        this.#nextTetromino = this.#getNextTetromino()
         const linesCleared = this.#map.clearFullRows()
         if (linesCleared > 0) {
             this.#updateNumbers(linesCleared)
-            updateCounts(this.#linesCleared, this.#score, this.#level)
-        }
-
-        this.#paintFromMap()
-        clearNext()
-        this.#paintNext()
-        if (this.#map.isOverflown) {
-            showGameOverDialog(this.#linesCleared, this.#level, this.#score)
-        }
-
-    }
-
-    #paintNext(): void {
-        const [minX, maxX, minY, maxY] = this.#nextTetromino.getDimensions()
-        const width = maxX - minX + 1
-        const height = maxY - minY + 1
-
-        for (let block of this.#nextTetromino.blockPositions()) {
-            paintNext(width, height, block[0] - minX, block[1] - minY, getColor(this.#nextTetromino.identifier))
         }
     }
 
-    #paintFromMap(): void {
-        clearAll()
-        for (let block of this.#map.getFilledFields()) {
-            drawBlock(block.x, block.y, getColor(block.identifier))
+    *getActivePosition(): Iterable<FixedSizeArray<number, 2>> {
+        for (let [x, y] of this.#activeTetromino.blockPositions()) {
+            yield [x + this.#activePosition.x, y + this.#activePosition.y]
         }
     }
 
-    #loop(time: number): void {
-        if (this.#map.isOverflown) return
-        setTimeout(() => {
-            this.#frame()
-            this.#loop(this.#intervalTime)
-        }, time)
+    moveLeft(): boolean {
+        this.#activePosition.x--
+        if (this.#map.isOutOfBounds(this.#activeTetromino, this.#activePosition.x, this.#activePosition.y) || this.#map.spotIsTaken(this.#activeTetromino, this.#activePosition.x, this.#activePosition.y)) {
+            this.#activePosition.x++
+            return false
+        }
+        return true
     }
 
-    #frame(): void {
-        this.#hideActiveTetromino()
+    moveRight(): boolean {
+        this.#activePosition.x++
+        if (this.#map.isOutOfBounds(this.#activeTetromino, this.#activePosition.x, this.#activePosition.y) || this.#map.spotIsTaken(this.#activeTetromino, this.#activePosition.x, this.#activePosition.y)) {
+            this.#activePosition.x--
+            return false
+        }
+        return true
+    }
+
+    moveDown(): boolean {
         ++this.#activePosition.y
         if (this.#map.spotIsTaken(this.#activeTetromino, this.#activePosition.x, this.#activePosition.y)) {
             --this.#activePosition.y
             this.#placeTetromino()
+            return false
         }
-        this.#drawActiveTetromino()
+        return true
     }
 
-    start(): void {
-        this.#loop(this.#intervalTime);
-        this.#paintNext()
-    }
-
-    moveRight() {
-        this.#hideActiveTetromino()
-        this.#activePosition.x++
-        if (this.#map.isOutOfBounds(this.#activeTetromino, this.#activePosition.x, this.#activePosition.y) || this.#map.spotIsTaken(this.#activeTetromino, this.#activePosition.x, this.#activePosition.y)) {
-            this.#activePosition.x--
-        }
-        this.#drawActiveTetromino()
-    }
-
-    moveLeft(): void {
-        this.#hideActiveTetromino()
-        this.#activePosition.x--
-        if (this.#map.isOutOfBounds(this.#activeTetromino, this.#activePosition.x, this.#activePosition.y) || this.#map.spotIsTaken(this.#activeTetromino, this.#activePosition.x, this.#activePosition.y)) {
-            this.#activePosition.x++
-        }
-        this.#drawActiveTetromino()
-    }
-
-    moveDown(): void {
-        this.#frame()
-    }
-
-    rotate(): void {
-        this.#hideActiveTetromino();
+    rotate(): boolean {
         this.#activeTetromino.rotate();
         if (this.#map.isOutOfBounds(this.#activeTetromino, this.#activePosition.x, this.#activePosition.y) || this.#map.spotIsTaken(this.#activeTetromino, this.#activePosition.x, this.#activePosition.y)) {
             this.#activeTetromino.rotateCounterClockWise();
+            return false
         }
-        this.#drawActiveTetromino()
-    }
-}
-
-function getNextTetromino(): Tetromino {
-    const number = Math.floor(Math.random() * 7);
-    switch (number) {
-        case 0:
-            return new Tetromino("Q", structuredClone(squareTetromino))
-        case 1:
-            return new Tetromino("I", structuredClone(ITetromino))
-        case 2:
-            return new Tetromino("T", structuredClone(TTetromino))
-        case 3:
-            return new Tetromino("F", structuredClone(FLTetromino))
-        case 4:
-            return new Tetromino("S", structuredClone(STetromino))
-        case 5:
-            return new Tetromino("FS", structuredClone(FSTetromino))
-        default:
-            return new Tetromino("L", structuredClone(LTetromino))
+        return true
     }
 }
