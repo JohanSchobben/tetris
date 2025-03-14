@@ -160,10 +160,11 @@ export class TetrisGame extends HTMLElement {
     }
 
     start(): void {
-        this.#game = new Game(this.height, this.width);
+        if (!this.#ctx) return
+        this.#game = new Game(this.height, this.width)
         this.#tileSize = 40
         this.#intervalTime = 1000
-        this.#loop(this.#intervalTime);
+        this.#loop(this.#intervalTime)
         this.#ctx.fillStyle = this.#colors.get("background")!
         this.#clearCanvas()
     }
