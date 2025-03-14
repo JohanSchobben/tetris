@@ -3,10 +3,6 @@ import {Tetromino} from "./game.ts";
 const $next: HTMLCanvasElement = document.querySelector("#next")!
 const nextCtx: CanvasRenderingContext2D = $next?.getContext("2d")!
 const $score: HTMLSpanElement = document.querySelector("#score")!
-const $levelTable: HTMLTableCellElement = document.querySelector("#level-table")!
-const $scoreTable: HTMLTableCellElement = document.querySelector("#score-table")!
-const $linesTable: HTMLTableCellElement = document.querySelector("#lines-table")!
-const $dialog: HTMLDialogElement = document.querySelector("#dialog")!
 const TILE_SIZE = 40;
 const BORDER_SIZE = 2;
 const colors = new Map<string, string>()

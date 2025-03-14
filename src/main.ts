@@ -11,6 +11,10 @@ const $tetisGame: TetrisGame = document.querySelector("tetris-game")
 const $lines: HTMLSpanElement = document.querySelector("#lines")!
 const $score: HTMLSpanElement = document.querySelector("#score")!
 const $level: HTMLSpanElement = document.querySelector("#level")!
+const $levelTable: HTMLTableCellElement = document.querySelector("#level-table")!
+const $scoreTable: HTMLTableCellElement = document.querySelector("#score-table")!
+const $linesTable: HTMLTableCellElement = document.querySelector("#lines-table")!
+const $dialog: HTMLDialogElement = document.querySelector("#dialog")!
 
 $playGame.addEventListener("click", () => {
     $playArea.style.display = "flex"
@@ -18,13 +22,12 @@ $playGame.addEventListener("click", () => {
     $tetisGame.start()
     drawNext($tetisGame.nextTetromino!)
 })
-//
-// $playAgain.addEventListener("click", () => {
-//     game = new Game()
-//     setup(10, 20)
-//     game.start()
-// })
-//
+
+$playAgain.addEventListener("click", () => {
+    $dialog.close()
+    $tetisGame.start()
+})
+
 window.addEventListener("keydown", (event) => {
     if (event.key === "ArrowLeft" || event.key === "a" || event.key === "h") {
         $tetisGame.moveLeft()
@@ -38,7 +41,10 @@ window.addEventListener("keydown", (event) => {
 })
 
 $tetisGame.addEventListener("gameOver", () => {
-    console.log("game over");
+    $scoreTable.textContent  = $score.textContent
+    $linesTable.textContent = $lines.textContent
+    $levelTable.textContent = $level.textContent
+    $dialog.showModal()
 });
 
 // @ts-ignore

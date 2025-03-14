@@ -7,6 +7,10 @@ export class TetrisMap {
     readonly #board: string[][];
     #isOverflown: boolean;
 
+    get width(): number {
+        return this.#width;
+    }
+
     constructor(height: number, width: number) {
         this.#isOverflown = false;
         this.#height = height;
@@ -272,13 +276,24 @@ export class Game {
     constructor(height: number, width: number) {
         this.#map = new TetrisMap(height, width)
         this.#activeTetromino = this.#getNextTetromino()
-        this.#activePosition = {x: Math.floor(width / 2), y: -5 }
+        const [minX, maxX, minY, maxY] = this.#activeTetromino.getDimensions();
+        const newXPlace = this.#map.width / 2 - Math.ceil((maxX - minX + 1) / 2)
+        const newYPlace = (maxY - minY + 1) * -1 - 1
+        this.#activePosition = {x: newXPlace, y: newYPlace}
         this.#nextTetromino = this.#getNextTetromino()
         this.#linesCleared = 0
         this.#score = 0
     }
 
     #getNextTetromino(): Tetromino {
+        const next = this.#getRandomTetromino()
+        if (this.#activeTetromino && next.identifier === this.#activeTetromino.identifier) {
+            return this.#getNextTetromino()
+        }
+        return next
+    }
+
+    #getRandomTetromino(): Tetromino {
         const number = Math.floor(Math.random() * 7);
         switch (number) {
             case 0:
@@ -305,8 +320,11 @@ export class Game {
     }
 
     #placeTetromino(): void {
+        const [minX, maxX, minY, maxY] = this.#nextTetromino.getDimensions();
+        const newXPlace = this.#map.width / 2 - Math.ceil((maxX - minX + 1) / 2)
+        const newYPlace = (maxY - minY + 1) * -1 - 1
         this.#map.place(this.#activeTetromino, this.#activePosition.x, this.#activePosition.y)
-        this.#activePosition = {x: 5, y: -5}
+        this.#activePosition = {x: newXPlace, y: newYPlace}
         this.#activeTetromino = this.#nextTetromino
         this.#nextTetromino = this.#getNextTetromino()
         const linesCleared = this.#map.clearFullRows()

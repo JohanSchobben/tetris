@@ -32,6 +32,10 @@ export class TetrisGame extends HTMLElement {
         return this.#game?.nextTetromino;
     }
 
+    get gameOver(): boolean {
+         return this.#game?.map.isOverflown ?? true
+    }
+
     constructor() {
         super();
         this.#game = new Game(this.height, this.width);
@@ -99,7 +103,7 @@ export class TetrisGame extends HTMLElement {
     }
 
     moveLeft(): void {
-        if (!this.#game) return
+        if (!this.#game || this.gameOver) return
         const activePosition = Array.from(this.#game?.getActivePosition())
         const success = this.#game?.moveLeft()
         if (success) {
@@ -109,7 +113,7 @@ export class TetrisGame extends HTMLElement {
     }
 
     moveRight(): void {
-        if (!this.#game) return
+        if (!this.#game || this.gameOver) return
         const activePosition = Array.from(this.#game?.getActivePosition())
         const success = this.#game?.moveRight()
         if (success) {
@@ -119,7 +123,7 @@ export class TetrisGame extends HTMLElement {
     }
 
     moveDown(): void {
-        if (!this.#game) return
+        if (!this.#game || this.gameOver) return
         const activePosition = Array.from(this.#game.getActivePosition())
         const linesCleared = this.#game.linesCleared
         const level = this.#game.level
@@ -133,6 +137,7 @@ export class TetrisGame extends HTMLElement {
             }
             if (level !== this.#game.level) {
                 this.dispatchEvent(new CustomEvent("levelChange", {detail: this.#game.level}))
+                this.#intervalTime = 1000 - 200 * this.#game.level
             }
             if (this.#game.map.isOverflown) {
                 this.dispatchEvent(new CustomEvent("gameOver"))
@@ -145,7 +150,7 @@ export class TetrisGame extends HTMLElement {
     }
 
     rotate(): void {
-        if (!this.#game) return
+        if (!this.#game || this.gameOver) return
         const activePosition = Array.from(this.#game.getActivePosition())
         const success = this.#game?.rotate()
         if (success) {
@@ -155,7 +160,12 @@ export class TetrisGame extends HTMLElement {
     }
 
     start(): void {
+        this.#game = new Game(this.height, this.width);
+        this.#tileSize = 40
+        this.#intervalTime = 1000
         this.#loop(this.#intervalTime);
+        this.#ctx.fillStyle = this.#colors.get("background")!
+        this.#clearCanvas()
     }
 
     connectedCallback(): void {
