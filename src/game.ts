@@ -229,13 +229,6 @@ export const squareTetromino: TetrominoMap<2> = [
     [true, true]
 ];
 
-export type Block = {
-    x: number;
-    y: number;
-    identifier: number;
-}
-
-
 export class Game {
     readonly #map: TetrisMap
     #activeTetromino: Tetromino
@@ -267,11 +260,6 @@ export class Game {
     get score(): number {
         return this.#score
     }
-
-    get isOverflown(): boolean {
-        return this.#map.isOverflown
-    }
-
 
     constructor(height: number, width: number) {
         this.#map = new TetrisMap(height, width)
