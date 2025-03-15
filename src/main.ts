@@ -2,12 +2,13 @@ import './style.css'
 import "./element.ts"
 import {TetrisGame} from "./element.ts";
 import {drawNext, setup, updateScore} from "./ui.ts";
+import {challenge} from "./network.ts"
 
 const $playAgain: HTMLButtonElement = document.querySelector("#play-again")!
 const $playArea: HTMLDivElement = document.querySelector(".play-area")!
 const $playGame: HTMLButtonElement = document.querySelector("#play-game")!
 const $menu: HTMLDivElement = document.querySelector("#menu")!
-const $tetisGame: TetrisGame = document.querySelector("tetris-game")
+const $tetrisGame: TetrisGame = document.querySelector("tetris-game")!
 const $lines: HTMLSpanElement = document.querySelector("#lines")!
 const $score: HTMLSpanElement = document.querySelector("#score")!
 const $level: HTMLSpanElement = document.querySelector("#level")!
@@ -19,28 +20,28 @@ const $dialog: HTMLDialogElement = document.querySelector("#dialog")!
 $playGame.addEventListener("click", () => {
     $playArea.style.display = "flex"
     $menu.style.display = "none"
-    $tetisGame.start()
-    drawNext($tetisGame.nextTetromino!)
+    $tetrisGame.start()
+    drawNext($tetrisGame.nextTetromino!)
 })
 
 $playAgain.addEventListener("click", () => {
     $dialog.close()
-    $tetisGame.start()
+    $tetrisGame.start()
 })
 
 window.addEventListener("keydown", (event) => {
     if (event.key === "ArrowLeft" || event.key === "a" || event.key === "h") {
-        $tetisGame.moveLeft()
+        $tetrisGame.moveLeft()
     } else if (event.key === "ArrowRight" || event.key === "d" || event.key === "l") {
-        $tetisGame.moveRight()
+        $tetrisGame.moveRight()
     } else if (event.key === "ArrowDown" || event.key === "s" || event.key === "j") {
-        $tetisGame.moveDown()
+        $tetrisGame.moveDown()
     } else if (event.key === " " || event.key === "ArrowUp" || event.key === "w" || event.key === "k") {
-        $tetisGame.rotate()
+        $tetrisGame.rotate()
     }
 })
 
-$tetisGame.addEventListener("gameOver", () => {
+$tetrisGame.addEventListener("gameOver", () => {
     $scoreTable.textContent  = $score.textContent
     $linesTable.textContent = $lines.textContent
     $levelTable.textContent = $level.textContent
@@ -48,23 +49,25 @@ $tetisGame.addEventListener("gameOver", () => {
 });
 
 // @ts-ignore
-$tetisGame.addEventListener("linesClearedChange", (event: CustomEvent<number>) => {
+$tetrisGame.addEventListener("linesClearedChange", (event: CustomEvent<number>) => {
     $lines.textContent = String(event.detail)
 })
 
 // @ts-ignore
-$tetisGame.addEventListener("levelChange", (event: CustomEvent<number>) => {
+$tetrisGame.addEventListener("levelChange", (event: CustomEvent<number>) => {
     $level.textContent = String(event.detail)
 })
 
 // @ts-ignore
-$tetisGame.addEventListener("scoreChange", (event: CustomEvent<number>) => {
+$tetrisGame.addEventListener("scoreChange", (event: CustomEvent<number>) => {
     updateScore(event.detail)
 })
 
-$tetisGame.addEventListener("place", () => {
-    drawNext($tetisGame.nextTetromino!)
+$tetrisGame.addEventListener("place", () => {
+    drawNext($tetrisGame.nextTetromino!)
 })
 
 setup()
 $playGame.click()
+
+challenge("bob ross")
