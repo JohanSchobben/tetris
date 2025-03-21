@@ -10,14 +10,19 @@
     <div id="menu">
       <h1 class="game-title">Tetris</h1>
       <button class="btn" id="play-game">Play game</button>
+      <br>
+      <button class="btn" id="spectate-game">Spectate</button>
     </div>
-    <div class="play-area">
-      <tetris-game width="10" height="20"></tetris-game>
-      <div class="next-area">
-        <canvas id="next"></canvas>
-        <p>Lines: <span id="lines">0</span></p>
-        <p>Score: <span id="score">0</span></p>
-        <p>Level: <span id="level">0</span></p>
+    <div class="main-area" id="main-area">
+      <span id="status-text" class="status-text">Hello world</span>
+      <div class="play-area">
+        <tetris-game width="10" height="20"></tetris-game>
+        <div class="next-area">
+          <canvas id="next"></canvas>
+          <p>Lines: <span id="lines">0</span></p>
+          <p>Score: <span id="score">0</span></p>
+          <p>Level: <span id="level">0</span></p>
+        </div>
       </div>
     </div>
     <dialog id="dialog">

@@ -1,3 +1,5 @@
+import Rand from "rand-seed";
+
 export type FixedSizeArray<T, N extends number> = { length: N } & Array<T>;
 type TetrominoMap<N extends number = number> = FixedSizeArray<FixedSizeArray<boolean, N>, N>
 
@@ -236,6 +238,7 @@ export class Game {
     #nextTetromino: Tetromino
     #linesCleared: number
     #score: number
+    #random: Rand
 
     get level(): number {
         return Math.floor(this.#linesCleared / 10)
@@ -261,7 +264,8 @@ export class Game {
         return this.#score
     }
 
-    constructor(height: number, width: number) {
+    constructor(height: number, width: number, seed: string) {
+        this.#random = new Rand(seed)
         this.#map = new TetrisMap(height, width)
         this.#activeTetromino = this.#getNextTetromino()
         const [minX, maxX, minY, maxY] = this.#activeTetromino.getDimensions();
@@ -282,7 +286,7 @@ export class Game {
     }
 
     #getRandomTetromino(): Tetromino {
-        const number = Math.floor(Math.random() * 7);
+        const number = Math.floor(this.#random.next() * 7);
         switch (number) {
             case 0:
                 return new Tetromino("Q", structuredClone(squareTetromino))

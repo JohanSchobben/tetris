@@ -32,7 +32,7 @@ body {
 }
 
 .play-area {
-    display: none;
+    display: flex;
     align-items: flex-start;
     gap: 64px;
 }
@@ -105,4 +105,14 @@ dialog {
 
 .game-title {
     font-size: 120px;
+}
+
+.status-text {
+    font-style: italic;
+    margin-bottom: 16px;
+}
+
+.main-area {
+    display: none;
+    flex-direction: column;
 }

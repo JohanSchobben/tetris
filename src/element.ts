@@ -38,7 +38,6 @@ export class TetrisGame extends HTMLElement {
 
     constructor() {
         super();
-        this.#game = new Game(this.height, this.width);
         this.#tileSize = 40
         this.#intervalTime = 1000
         this.#colors = new Map<string, string>()
@@ -109,6 +108,7 @@ export class TetrisGame extends HTMLElement {
         if (success) {
             this.#clearBlocks(activePosition)
             this.#drawActiveBlock()
+            this.dispatchEvent(new CustomEvent("left"))
         }
     }
 
@@ -119,6 +119,7 @@ export class TetrisGame extends HTMLElement {
         if (success) {
             this.#clearBlocks(activePosition)
             this.#drawActiveBlock()
+            this.dispatchEvent(new CustomEvent("right"))
         }
     }
 
@@ -129,9 +130,11 @@ export class TetrisGame extends HTMLElement {
         const level = this.#game.level
         const success = this.#game?.moveDown()
         this.#clearBlocks(activePosition)
+        this.dispatchEvent(new CustomEvent("down"))
         if (!success) {
             this.dispatchEvent(new CustomEvent("place"))
             if (linesCleared !== this.#game.linesCleared) {
+                this.dispatchEvent(new CustomEvent("scoreChange", {detail: this.#game.score}))
                 this.dispatchEvent(new CustomEvent("scoreChange", {detail: this.#game.score}))
                 this.dispatchEvent(new CustomEvent("linesClearedChange", {detail: this.#game.linesCleared}))
             }
@@ -156,17 +159,21 @@ export class TetrisGame extends HTMLElement {
         if (success) {
             this.#clearBlocks(activePosition)
             this.#drawActiveBlock()
+            this.dispatchEvent(new CustomEvent("rotate"))
         }
     }
 
-    start(): void {
+    start(seed: string): void {
         if (!this.#ctx) return
-        this.#game = new Game(this.height, this.width)
+        this.#game = new Game(this.height, this.width, seed)
         this.#tileSize = 40
         this.#intervalTime = 1000
-        this.#loop(this.#intervalTime)
         this.#ctx.fillStyle = this.#colors.get("background")!
         this.#clearCanvas()
+    }
+
+    startLoop(): void {
+        this.#loop(this.#intervalTime)
     }
 
     connectedCallback(): void {
