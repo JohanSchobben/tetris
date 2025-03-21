@@ -1,4 +1,3 @@
-const decoder = new TextDecoder();
 let socket: WebSocket;
 
 export function challenge(username: string) {
@@ -9,11 +8,7 @@ export function challenge(username: string) {
     // const body = await res.json()
     socket = new WebSocket("ws://localhost:3000")
     socket.addEventListener("open", () => {
-        socket.send("player")
-    })
-
-    socket.addEventListener("message", (message) => {
-        console.log(message.data)
+        socket.send("player:" + username)
     })
 
     return socket
@@ -30,10 +25,6 @@ export function spectate(): WebSocket {
 
     socket.addEventListener("open", () => {
         socket.send("spectate")
-    })
-
-    socket.addEventListener("message", function (message) {
-        console.log(message.data)
     })
 
     return socket

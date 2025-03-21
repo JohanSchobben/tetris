@@ -24,7 +24,6 @@ export function setup(): void {
 }
 
 export function drawNext(t: Tetromino): void {
-    console.log("drawing", t)
     const [minX, maxX, minY, maxY] = t.getDimensions()
     const width = (maxX - minX + 1) * TILE_SIZE
     const height = (maxY - minY + 1) * TILE_SIZE

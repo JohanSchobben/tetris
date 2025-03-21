@@ -9,6 +9,7 @@ const $mainArea: HTMLDivElement = document.querySelector("#main-area")!
 const $statusText: HTMLSpanElement = document.querySelector("#status-text")!
 const $playGame: HTMLButtonElement = document.querySelector("#play-game")!
 const $spectateGame: HTMLButtonElement = document.querySelector("#spectate-game")!
+const $nameInput: HTMLInputElement = document.querySelector("#name-input")!
 const $menu: HTMLDivElement = document.querySelector("#menu")!
 const $tetrisGame: TetrisGame = document.querySelector("tetris-game")!
 const $lines: HTMLSpanElement = document.querySelector("#lines")!
@@ -24,7 +25,7 @@ $playGame.addEventListener("click", () => {
     $menu.style.display = "none"
     $statusText.textContent = "Waiting for spectator..."
     setupListeners();
-    const socket = challenge("")
+    const socket = challenge($nameInput.value ?? "Boring name picker")
     socket.addEventListener("message", ({data}) => {
         if (data === "start") {
             console.log(data)
@@ -72,7 +73,7 @@ function setupListeners(): void {
 }
 
 
-function onMessageForSpectator(data): void {
+function onMessageForSpectator(data: string): void {
     if (data === "start") {
         $statusText.textContent = "spectating game"
         $tetrisGame.start("1234")
@@ -88,6 +89,10 @@ function onMessageForSpectator(data): void {
     }
     if (data === "rotate") {
         $tetrisGame.rotate()
+    }
+    if (data.startsWith("name:")) {
+        const name = data.split(":")[1]
+        $statusText.textContent = "Spectating " + name
     }
 }
 

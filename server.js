@@ -53,6 +53,7 @@ const server = app.listen(port, () => {
 const wss = new WebSocketServer({server})
 let spectator;
 let player;
+let name;
 
 wss.on('connection', function connection(ws, client) {
   ws.on("message", (body) => {
@@ -72,25 +73,29 @@ wss.on('connection', function connection(ws, client) {
     //   game.opponentClient.send(JSON.stringify({type: "start"}))
     // }
 
-    const data = decoder.decode(body)
-    console.log(data)
+    const command = decoder.decode(body).split(":")
+    const action = command[0]
+    console.log(action)
 
-    if (data === "spectate") {
+    if (action === "spectate") {
       spectator = ws
       if (player) {
         player.send("start")
         spectator.send("start")
+        spectator.send(`name:${name}`)
       }
-    } else if (data === "player") {
+    } else if (action === "player") {
       player = ws
+      name = command[1]
       if (spectator) {
         player.send("start")
         spectator.send("start")
+        spectator.send(`name:${name}`)
       }
     }
 
     if (spectator && player) {
-      spectator.send(data)
+      spectator.send(action)
     }
   })
 
